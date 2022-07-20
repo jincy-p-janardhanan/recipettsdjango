@@ -1,4 +1,3 @@
-from attr import fields
 from rest_framework import serializers
 from base.models import Recipe
 from base.models import RecipeInstruction
