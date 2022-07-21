@@ -4,8 +4,7 @@ from pydub import AudioSegment
 import os
 
 def getRecipeAudio(recipe_instructions, user_id = 0, language = 'en'):
-
-    recipe_instructions = list(recipe_instructions)
+    
     recipe_instructions.sort(key=lambda x: x.seq_no)
 
     for i in recipe_instructions:

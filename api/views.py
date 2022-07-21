@@ -5,7 +5,7 @@ from .serializers import InstructionSerializer, RecipeSerializer
 from base.models import Recipe
 from base.models import RecipeInstruction
 from services import tts_service
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
 @api_view(['GET'])
 def getRecipeInfo(request):
@@ -40,15 +40,22 @@ def addRecipeInstruction(request):
 @api_view(['get'])
 def play(request):
     r_id = request.GET.get('r_id', None)
-    recipe_instructions = RecipeInstruction.objects.filter(r_id=r_id)
-    filename = tts_service.getRecipeAudio(recipe_instructions)
-    file =  open(filename, "rb").read()
-    response = HttpResponse(file, content_type='audio/mpeg')
-    # response['Content-Disposition'] = 'attachment; filename='+filename
-    try:
-            os.remove(filename)
-    except:
-        print(filename + 'not deleted.')
+    if(r_id != None):
+        recipe_instructions = RecipeInstruction.objects.filter(r_id=r_id)
+        recipe_instructions = list(recipe_instructions)
+        if(len(recipe_instructions) != 0):
+            filename = tts_service.getRecipeAudio(recipe_instructions)
+            file =  open(filename, "rb").read()
+            response = HttpResponse(file, content_type='audio/mpeg')
+            # response['Content-Disposition'] = 'attachment; filename='+filename
+            try:
+                    os.remove(filename)
+            except:
+                print(filename + 'not deleted.')
 
-    return response
+            return response
+        else:
+            return JsonResponse({'error':'Recipe instructions not found for given r_id.'}, status=400)
+    else:
+        return JsonResponse({'error':'Missing parameter r_id'}, status=422)
     
