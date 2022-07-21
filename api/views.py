@@ -1,4 +1,5 @@
 import os
+from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .serializers import InstructionSerializer, RecipeSerializer
@@ -43,19 +44,26 @@ def play(request):
     if(r_id != None):
         recipe_instructions = RecipeInstruction.objects.filter(r_id=r_id)
         recipe_instructions = list(recipe_instructions)
+        recipe_instructions.sort(key=lambda x: x.seq_no)
+
         if(len(recipe_instructions) != 0):
             filename = tts_service.getRecipeAudio(recipe_instructions)
-            file =  open(filename, "rb").read()
-            response = HttpResponse(file, content_type='audio/mpeg')
-            # response['Content-Disposition'] = 'attachment; filename='+filename
-            try:
-                    os.remove(filename)
-            except:
-                print(filename + 'not deleted.')
+            context = {
+                "filepath" :  '/media/'+filename
+            }
 
-            return response
+            # file =  open(filename, "rb").read()
+            # response = HttpResponse(file, content_type='audio/mpeg')
+            # # response['Content-Disposition'] = 'attachment; filename='+filename
+            # try:
+            #         os.remove(filename)
+            # except:
+            #     print(filename + 'not deleted.')
+            # 
+            # return response
+        
+            return render(request, "index.html", context)
         else:
             return JsonResponse({'error':'Recipe instructions not found for given r_id.'}, status=400)
     else:
         return JsonResponse({'error':'Missing parameter r_id'}, status=422)
-    
